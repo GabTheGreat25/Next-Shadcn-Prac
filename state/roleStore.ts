@@ -28,7 +28,14 @@ export const useRoleStore = create<RoleState>((set) => ({
       );
       set({ roles: response.data.data, loading: false });
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 }));

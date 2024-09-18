@@ -52,7 +52,14 @@ export const useMerchantStore = create<MerchantState>((set) => ({
       }));
       set({ merchants: normalizedMerchants, loading: false });
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -70,7 +77,14 @@ export const useMerchantStore = create<MerchantState>((set) => ({
       };
       set({ singleMerchant: normalizedMerchant, loading: false });
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -85,7 +99,14 @@ export const useMerchantStore = create<MerchantState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -106,7 +127,14 @@ export const useMerchantStore = create<MerchantState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -119,7 +147,14 @@ export const useMerchantStore = create<MerchantState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 }));

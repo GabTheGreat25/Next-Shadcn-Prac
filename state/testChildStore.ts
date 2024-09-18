@@ -66,7 +66,14 @@ export const useTestChildStore = create<TestChildState>((set) => ({
       }));
       set({ testChildren: normalizedTestChildren, loading: false });
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -93,7 +100,14 @@ export const useTestChildStore = create<TestChildState>((set) => ({
       };
       set({ singleTestChild: normalizedTestChild, loading: false });
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -108,7 +122,14 @@ export const useTestChildStore = create<TestChildState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -129,7 +150,14 @@ export const useTestChildStore = create<TestChildState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -142,7 +170,14 @@ export const useTestChildStore = create<TestChildState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 }));

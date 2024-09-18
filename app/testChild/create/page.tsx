@@ -70,7 +70,7 @@ export default function CreateTestChild() {
     formData.append("testId", values.testId.toString());
 
     try {
-      await addTestChild(formData);
+      addTestChild(formData);
       reset();
       router.push("/testChild");
     } catch (error) {

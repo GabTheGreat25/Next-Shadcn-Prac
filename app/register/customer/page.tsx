@@ -103,7 +103,7 @@ export default function CreateCustomer() {
     try {
       addCustomer(formData);
       reset();
-      router.push("/customers");
+      router.push("/login");
     } catch (error) {
       console.error("Error adding customer:", error);
     }

@@ -59,7 +59,14 @@ export const useCustomerStore = create<CustomerState>((set) => ({
       }));
       set({ customers: normalizedCustomers, loading: false });
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -82,7 +89,14 @@ export const useCustomerStore = create<CustomerState>((set) => ({
       };
       set({ singleCustomer: normalizedCustomer, loading: false });
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -97,7 +111,14 @@ export const useCustomerStore = create<CustomerState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -118,7 +139,14 @@ export const useCustomerStore = create<CustomerState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 
@@ -131,7 +159,14 @@ export const useCustomerStore = create<CustomerState>((set) => ({
         loading: false,
       }));
     } catch (error: any) {
-      set({ error: error.message, loading: false });
+      const errorDetails = error.response
+        ? `${error.response.data.message || "Unknown error occurred"}`
+        : error.message || "An error occurred while logging in.";
+
+      set({
+        error: errorDetails,
+        loading: false,
+      });
     }
   },
 }));

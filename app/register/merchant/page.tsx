@@ -68,7 +68,7 @@ export default function CreateMerchant() {
 
   useEffect(() => {
     const loadRoles = async () => {
-      await fetchRoles();
+      fetchRoles();
 
       const merchantRole = roles.find((role) => role.roleName === "Merchant");
 
@@ -94,9 +94,9 @@ export default function CreateMerchant() {
     formData.append("password", values.password);
 
     try {
-      await addMerchant(formData);
+      addMerchant(formData);
       reset();
-      router.push("/merchants");
+      router.push("/login");
     } catch (error) {
       console.error("Error adding merchant:", error);
     }

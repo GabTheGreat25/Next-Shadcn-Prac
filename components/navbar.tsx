@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -9,17 +9,27 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/state/authStore";
 
 export default function Navbar() {
+  const { user } = useAuthStore();
+
   const router = useRouter();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const handleHome = () => {
+    router.push("/");
+  };
 
   const handleLogin = () => {
     router.push("/login");
   };
 
-  const handleSignup = () => {
-    router.push("/signup");
+  const handleCustomerRegister = () => {
+    router.push("/register/customer");
+  };
+
+  const handleMerchantRegister = () => {
+    router.push("/register/merchant");
   };
 
   const handleTest = () => {
@@ -30,18 +40,20 @@ export default function Navbar() {
     router.push("/testChild");
   };
 
+  const handleLogout = async () => {
+    useAuthStore.getState().logoutUser();
+    router.push("/login");
+  };
+
   return (
     <nav className="bg-gray-800 text-white py-4 px-12 flex justify-between items-center shadow-md">
-      <div className="text-xl font-bold">WebName</div>
+      <div className="text-xl font-bold cursor-pointer" onClick={handleHome}>
+        Quick Shopping
+      </div>
       <div className="space-x-6">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="bg-gray-600 hover:bg-gray-700"
-            >
-              Tables
-            </Button>
+            <Button className="bg-gray-600 hover:bg-gray-700">Tables</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white text-black mt-2 rounded shadow-lg">
             <DropdownMenuItem
@@ -60,28 +72,40 @@ export default function Navbar() {
         </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="bg-gray-600 hover:bg-gray-700"
-            >
-              Account
-            </Button>
+            <Button className="bg-gray-600 hover:bg-gray-700">Register</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white text-black mt-2 rounded shadow-lg">
             <DropdownMenuItem
-              onClick={handleLogin}
+              onClick={handleCustomerRegister}
               className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
             >
-              Login
+              Customer
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={handleSignup}
+              onClick={handleMerchantRegister}
               className="px-4 py-2 hover:bg-gray-200 cursor-pointer"
             >
-              Sign Up
+              Merchant
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        {!user ? (
+          <>
+            <Button
+              onClick={handleLogin}
+              className="bg-gray-600 hover:bg-gray-700"
+            >
+              Login
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={handleLogout}
+            className="bg-gray-600 hover:bg-gray-700"
+          >
+            Logout
+          </Button>
+        )}
       </div>
     </nav>
   );
