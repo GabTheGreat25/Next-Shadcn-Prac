@@ -14,30 +14,49 @@ import {
   FormDescription,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { useTestStore } from "@/state/testStore";
+import { useTestChildStore } from "@/state/testChildStore";
 import { useRouter, useParams } from "next/navigation";
 
 const formSchema = z.object({
-  test: z.string().min(2, {
-    message: "Test name must be at least 2 characters.",
+  testChild: z.string().min(2, {
+    message: "Test child name must be at least 2 characters.",
   }),
   image: z.array(z.instanceof(File)).optional(),
+  testId: z.number().min(1, {
+    message: "Please select a test.",
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function EditTest() {
-  const { singleTest, fetchSingleTest, updateTest, loading } = useTestStore();
+export default function EditTestChild() {
+  const {
+    singleTestChild,
+    fetchSingleTestChild,
+    updateTestChild,
+    loading,
+    error,
+  } = useTestChildStore();
+  const { fetchTests, tests } = useTestStore();
   const router = useRouter();
   const { id } = useParams();
 
   const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [selectedTestId, setSelectedTestId] = useState<number | null>(null);
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      test: "",
+      testChild: "",
       image: [],
+      testId: 0,
     },
     mode: "onBlur",
   });
@@ -46,61 +65,68 @@ export default function EditTest() {
 
   useEffect(() => {
     if (id) {
-      fetchSingleTest(Number(id));
+      fetchSingleTestChild(Number(id));
+      fetchTests(); // Fetch tests when component mounts
     }
-  }, [id, fetchSingleTest]);
+  }, [id, fetchSingleTestChild, fetchTests]);
 
   useEffect(() => {
-    if (singleTest) {
-      setExistingImages(singleTest.image.map((img) => img.url));
+    if (singleTestChild) {
+      setExistingImages(singleTestChild.image.map((img) => img.url));
+      setSelectedTestId(singleTestChild.testId);
       reset({
-        test: singleTest.test || "",
+        testChild: singleTestChild.testChild || "",
         image: [],
+        testId: singleTestChild.testId || 0,
       });
     }
-  }, [singleTest, reset]);
+  }, [singleTestChild, reset]);
 
   const onSubmit = async (values: FormValues) => {
     const formData = new FormData();
-    formData.append("test", values.test);
+    formData.append("testChild", values.testChild);
     values.image?.forEach((file) => {
       formData.append("image", file);
     });
+    formData.append("testId", values.testId.toString());
 
     try {
       if (id) {
-        await updateTest(Number(id), formData);
-        router.push("/test");
+        await updateTestChild(Number(id), formData);
+        router.push("/testChild");
       }
     } catch (error) {
-      console.error("Error updating test:", error);
+      console.error("Error updating test child:", error);
     }
   };
 
   if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="p-6 max-w-md mx-auto min-h-screen place-content-center">
-      <h1 className="text-2xl font-bold mb-6">Edit Test</h1>
+      <h1 className="text-2xl font-bold mb-6">Edit Test Child</h1>
       <FormProvider {...methods}>
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <FormField
             control={control}
-            name="test"
+            name="testChild"
             render={({ field }) => (
               <FormItem>
-                <Label htmlFor="test">Test Name:</Label>
+                <Label htmlFor="testChild">Test Child Name:</Label>
                 <FormControl>
                   <Input
-                    id="test"
+                    id="testChild"
                     type="text"
-                    placeholder="Test Name"
+                    placeholder="Test Child Name"
                     {...field}
                     className="mt-1"
                   />
                 </FormControl>
-                <FormDescription>Enter the name of the test.</FormDescription>
-                <FormMessage>{formState.errors.test?.message}</FormMessage>
+                <FormDescription>
+                  Enter the name of the test child.
+                </FormDescription>
+                <FormMessage>{formState.errors.testChild?.message}</FormMessage>
               </FormItem>
             )}
           />
@@ -126,22 +152,52 @@ export default function EditTest() {
                   />
                 </FormControl>
                 <FormDescription>
-                  Upload new images related to the test. Existing images will be
-                  kept unless removed.
+                  Upload new images related to the test child. Existing images
+                  will be kept unless removed.
                 </FormDescription>
                 <FormMessage>{formState.errors.image?.message}</FormMessage>
               </FormItem>
             )}
           />
 
+          <FormItem>
+            <Label htmlFor="testId">Select Test:</Label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="w-full mt-1">
+                  {selectedTestId
+                    ? tests.find((test) => test.id === selectedTestId)?.test
+                    : "Select a test"}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {tests.map((test) => (
+                  <DropdownMenuItem
+                    key={test.id}
+                    onClick={() => {
+                      setSelectedTestId(test.id);
+                      setValue("testId", test.id);
+                    }}
+                  >
+                    {test.test}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <FormDescription>
+              Choose the test to associate with this child.
+            </FormDescription>
+            <FormMessage>{formState.errors.testId?.message}</FormMessage>
+          </FormItem>
+
           <h2 className="text-lg font-semibold">Your Image</h2>
           <div className="mt-4 flex flex-col items-center justify-center">
-            <div className=" w-1/2 mt-2">
+            <div className="w-1/2 mt-2">
               {existingImages.map((url) => (
                 <img
                   key={url}
                   src={url}
-                  alt="Test Image"
+                  alt="Test Child Image"
                   className="w-full h-auto object-cover rounded-md"
                 />
               ))}
@@ -158,7 +214,7 @@ export default function EditTest() {
               Go Back
             </Button>
             <Button type="submit" className="w-full mt-4">
-              Update Test
+              Update Test Child
             </Button>
           </div>
         </form>

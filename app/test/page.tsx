@@ -72,6 +72,7 @@ export default function TestListPage() {
                       )}
                     </div>
                   </TableCell>
+
                   <TableCell className="p-4">
                     <div className="flex space-x-4">
                       <Link href={`/test/edit/${test.id}`}>
