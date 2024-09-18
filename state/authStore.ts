@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist, PersistOptions } from "zustand/middleware";
 import axios from "axios";
 
 interface Role {
@@ -30,8 +31,8 @@ interface AuthState {
   accessToken: string | null;
   loading: boolean;
   error: string | null;
-  loginUser: (email: string, password: string) => void;
-  logoutUser: () => void;
+  loginUser: (email: string, password: string) => Promise<void>;
+  logoutUser: () => Promise<void>;
 }
 
 interface LoginResponse {
@@ -44,77 +45,85 @@ interface LoginResponse {
 
 const BASE_URL = "http://localhost:4000/api/v1/auth";
 
-const getInitialState = (): AuthState => {
-  const user = localStorage.getItem("user");
-  const accessToken = localStorage.getItem("accessToken");
-  return {
-    user: user ? JSON.parse(user) : null,
-    accessToken: accessToken || null,
-    loading: false,
-    error: null,
-    loginUser: async () => {},
-    logoutUser: async () => {},
-  };
+const customStorage: PersistOptions<AuthState, AuthState>["storage"] = {
+  getItem: (name) => {
+    const item = localStorage.getItem(name);
+    return item ? JSON.parse(item) : null;
+  },
+  setItem: (name, value) => {
+    localStorage.setItem(name, JSON.stringify(value));
+  },
+  removeItem: (name) => {
+    localStorage.removeItem(name);
+  },
 };
 
-export const useAuthStore = create<AuthState>((set) => ({
-  ...getInitialState(),
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      accessToken: null,
+      loading: false,
+      error: null,
 
-  loginUser: async (email: string, password: string) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await axios.post<LoginResponse>(`${BASE_URL}/login`, {
-        email,
-        password,
-      });
+      loginUser: async (email: string, password: string) => {
+        set({ loading: true, error: null });
+        try {
+          const response = await axios.post<LoginResponse>(
+            `${BASE_URL}/login`,
+            {
+              email,
+              password,
+            },
+          );
 
-      const user = response.data.data;
-      const accessToken = response.data.meta.accessToken;
+          const user = response.data.data;
+          const accessToken = response.data.meta.accessToken;
 
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("accessToken", accessToken);
+          set({
+            user,
+            accessToken,
+            loading: false,
+            error: null,
+          });
+        } catch (error: any) {
+          const errorDetails = error.response
+            ? `${error.response.data.message || "Unknown error occurred"}`
+            : error.message || "An error occurred while logging in.";
 
-      set({
-        user,
-        accessToken,
-        loading: false,
-        error: null,
-      });
-    } catch (error: any) {
-      const errorDetails = error.response
-        ? `${error.response.data.message || "Unknown error occurred"}`
-        : error.message || "An error occurred while logging in.";
+          set({
+            error: errorDetails,
+            loading: false,
+          });
+        }
+      },
 
-      set({
-        error: errorDetails,
-        loading: false,
-      });
-    }
-  },
+      logoutUser: async () => {
+        set({ loading: true, error: null });
+        try {
+          await axios.post(`${BASE_URL}/logout`);
 
-  logoutUser: async () => {
-    set({ loading: true, error: null });
-    try {
-      await axios.post(`${BASE_URL}/logout`);
+          set({
+            user: null,
+            accessToken: null,
+            loading: false,
+            error: null,
+          });
+        } catch (error: any) {
+          const errorDetails = error.response
+            ? `${error.response.data.message || "Unknown error occurred"}`
+            : error.message || "An error occurred while logging out.";
 
-      localStorage.removeItem("user");
-      localStorage.removeItem("accessToken");
-
-      set({
-        user: null,
-        accessToken: null,
-        loading: false,
-        error: null,
-      });
-    } catch (error: any) {
-      const errorDetails = error.response
-        ? `${error.response.data.message || "Unknown error occurred"}`
-        : error.message || "An error occurred while logging in.";
-
-      set({
-        error: errorDetails,
-        loading: false,
-      });
-    }
-  },
-}));
+          set({
+            error: errorDetails,
+            loading: false,
+          });
+        }
+      },
+    }),
+    {
+      name: "auth-storage",
+      storage: customStorage,
+    },
+  ),
+);

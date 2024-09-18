@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useAuthStore } from "@/state/authStore";
+import RouteHandler from "@/components/routeHandler";
 import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
@@ -25,8 +26,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function Login() {
-  const { loginUser, error, loading, accessToken } = useAuthStore();
-
+  const { loginUser, error, loading, user } = useAuthStore();
   const router = useRouter();
 
   const methods = useForm<FormValues>({
@@ -41,68 +41,75 @@ export default function Login() {
   const { handleSubmit, control, formState } = methods;
 
   const onSubmit = async (values: FormValues) => {
-    loginUser(values.email, values.password);
+    await loginUser(values.email, values.password);
+
+    if (user) {
+      const role = user.role.roleName;
+      if (role === "Merchant") {
+        router.push("/dashboard/merchant");
+      } else if (role === "Customer") {
+        router.push("/dashboard/customer");
+      }
+    }
   };
 
-  useEffect(() => {
-    if (accessToken) {
-      router.push("/");
-    }
-  }, [accessToken, router]);
-
   return (
-    <FormProvider {...methods}>
-      <div className="p-6 max-w-md mx-auto min-h-screen flex flex-col justify-center">
-        <h1 className="text-2xl font-bold mb-6">Login</h1>
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <FormField
-            control={control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="email">Email:</Label>
-                <FormControl>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Email"
-                    {...field}
-                    className="mt-1"
-                  />
-                </FormControl>
-                <FormDescription>Enter your email address.</FormDescription>
-                <FormMessage>{formState.errors.email?.message}</FormMessage>
-              </FormItem>
-            )}
-          />
+    <RouteHandler isProtected={false}>
+      <FormProvider {...methods}>
+        <div className="p-6 max-w-md mx-auto min-h-screen flex flex-col justify-center">
+          <h1 className="text-2xl font-bold mb-6">Login</h1>
+          <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
+            <FormField
+              control={control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="email">Email:</Label>
+                  <FormControl>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Email"
+                      {...field}
+                      className="mt-1"
+                    />
+                  </FormControl>
+                  <FormDescription>Enter your email address.</FormDescription>
+                  <FormMessage>{formState.errors.email?.message}</FormMessage>
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <Label htmlFor="password">Password:</Label>
-                <FormControl>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Password"
-                    {...field}
-                    className="mt-1"
-                  />
-                </FormControl>
-                <FormDescription>Enter your password.</FormDescription>
-                <FormMessage>{formState.errors.password?.message}</FormMessage>
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="password">Password:</Label>
+                  <FormControl>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Password"
+                      {...field}
+                      className="mt-1"
+                    />
+                  </FormControl>
+                  <FormDescription>Enter your password.</FormDescription>
+                  <FormMessage>
+                    {formState.errors.password?.message}
+                  </FormMessage>
+                </FormItem>
+              )}
+            />
 
-          {error && <p className="text-red-600">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
-          </Button>
-        </form>
-      </div>
-    </FormProvider>
+            {error && <p className="text-red-600">{error}</p>}
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Logging in..." : "Login"}
+            </Button>
+          </form>
+        </div>
+      </FormProvider>
+    </RouteHandler>
   );
 }

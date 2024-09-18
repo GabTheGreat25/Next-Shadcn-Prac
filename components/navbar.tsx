@@ -41,7 +41,7 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
-    useAuthStore.getState().logoutUser();
+    await useAuthStore.getState().logoutUser();
     router.push("/login");
   };
 
